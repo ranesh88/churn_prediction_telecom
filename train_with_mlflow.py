@@ -3,68 +3,57 @@ import pandas as pd
 import joblib
 import mlflow
 import mlflow.sklearn
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    accuracy_score, f1_score, precision_score, recall_score, roc_auc_score,
+    classification_report, confusion_matrix, roc_curve
+)
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score,
-    f1_score, roc_auc_score, classification_report,
-    confusion_matrix, roc_curve
-)
 
-import mlflow
-import os
+# ---------------- MLflow / Dagshub Setup ----------------
+DAGSHUB_USERNAME = os.getenv("DAGSHUB_USERNAME")
+DAGSHUB_REPO = os.getenv("DAGSHUB_REPO")
+DAGSHUB_USER_TOKEN = os.getenv("DAGSHUB_USER_TOKEN")
 
-import os
-import dagshub
-import mlflow
+if DAGSHUB_USERNAME and DAGSHUB_REPO and DAGSHUB_USER_TOKEN:
+    # GitHub Actions / CI environment
+    mlflow.set_tracking_uri(f"https://dagshub.com/{DAGSHUB_USERNAME}/{DAGSHUB_REPO}.mlflow")
+    print("✅ MLflow tracking set to Dagshub remote")
+else:
+    # Local environment
+    mlflow.set_tracking_uri("mlruns")
+    print("✅ MLflow tracking set to local 'mlruns' folder")
 
-DAGSHUB_USERNAME = os.getenv("ranesh88")
-DAGSHUB_REPO = os.getenv("https://dagshub.com/ranesh88/churn_prediction_telecom.mlflow")
-DAGSHUB_USER_TOKEN = os.getenv("fe050ad381cfbb3c509e0a20d88be87f5e1c63a0")
-
-dagshub.init(repo_name=DAGSHUB_REPO, repo_owner=DAGSHUB_USERNAME, mlflow=True)
 mlflow.set_experiment("Telecom_Churn_Experiment")
 
-
-# ---------------- Load Data ----------------
+# ---------------- Load dataset ----------------
 df = pd.read_csv("Churn_Prediction_Final.csv")
 
+# ---------------- Preprocessing ----------------
 y = df["Churn"]
 X = df.drop("Churn", axis=1)
-
-# One-hot encoding for categorical variables
 X = pd.get_dummies(X, drop_first=True)
 
-# ---------------- Train/Test Split ----------------
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# ---------------- MLflow Experiment ----------------
-mlflow.set_experiment("Telecom_Churn_Experiment")
-
+# ---------------- Training ----------------
 with mlflow.start_run():
     print("Training RandomForest model...")
-
-    # ---------------- Model ----------------
-    n_estimators = 150
-    max_depth = 8
+    n_estimators = 100
     random_state = 42
 
-    model = RandomForestClassifier(
-        n_estimators=n_estimators,
-        max_depth=max_depth,
-        random_state=random_state
-    )
+    model = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state)
     model.fit(X_train, y_train)
 
-    # ---------------- Predictions ----------------
+    # Predictions
     y_pred = model.predict(X_test)
     y_proba = model.predict_proba(X_test)[:, 1]
 
-    # ---------------- Metrics ----------------
+    # Metrics
     accuracy = accuracy_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred)
@@ -88,20 +77,19 @@ with mlflow.start_run():
     print("\n=== Confusion Matrix ===")
     print(cm_df)
 
-    os.makedirs("models", exist_ok=True)
-
-    # Confusion matrix plot
+    # Save confusion matrix plot
     plt.figure(figsize=(5, 4))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=[0, 1], yticklabels=[0, 1])
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.title("Confusion Matrix")
+    os.makedirs("models", exist_ok=True)
     cm_path = os.path.join("models", "confusion_matrix.png")
     plt.savefig(cm_path)
     plt.close()
     mlflow.log_artifact(cm_path)
 
-    # ---------------- ROC Curve ----------------
+    # ROC curve plot
     fpr, tpr, _ = roc_curve(y_test, y_proba)
     plt.figure()
     plt.plot(fpr, tpr, label=f"ROC curve (AUC = {roc_auc:.2f})")
@@ -115,17 +103,15 @@ with mlflow.start_run():
     plt.close()
     mlflow.log_artifact(roc_path)
 
-    # ---------------- Save Model ----------------
+    # ---------------- Save model ----------------
     model_path = os.path.join("models", "rf_classifier.pkl")
     joblib.dump(model, model_path)
     print(f"\nModel saved to {model_path}")
     mlflow.log_artifact(model_path, artifact_path="models")
 
-    # ---------------- Log Params & Metrics ----------------
+    # ---------------- Log parameters & metrics ----------------
     mlflow.log_param("n_estimators", n_estimators)
-    mlflow.log_param("max_depth", max_depth)
     mlflow.log_param("random_state", random_state)
-
     mlflow.log_metric("accuracy", accuracy)
     mlflow.log_metric("f1_score", f1)
     mlflow.log_metric("precision", precision)
@@ -139,5 +125,4 @@ with mlflow.start_run():
         f.write(class_report)
     mlflow.log_artifact(report_path)
 
-print("\nRun MLflow UI with:")
-print("mlflow ui --port 5000")
+print("\nRun MLflow UI locally with: mlflow ui --port 5000")
