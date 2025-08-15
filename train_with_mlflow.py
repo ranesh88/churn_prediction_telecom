@@ -14,23 +14,32 @@ from sklearn.metrics import (
 import mlflow
 import mlflow.sklearn
 
+# ---------------- Set working directory to script location ----------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(BASE_DIR)
+
 # ---------------- MLflow setup ----------------
-# Use local mlruns folder
-mlflow.set_tracking_uri("mlruns")
+MLRUNS_DIR = "mlruns"  # relative path works cross-platform
+mlflow.set_tracking_uri(MLRUNS_DIR)
 mlflow.set_experiment("Telecom_Churn_Experiment")
-print("✅ MLflow tracking set to local 'mlruns' folder")
+print(f"✅ MLflow tracking set to local '{MLRUNS_DIR}' folder")
 
 # ---------------- Load data ----------------
-data = pd.read_csv("Churn_Prediction_Final.csv")
+DATA_FILE = "Churn_Prediction_Final.csv"
+data = pd.read_csv(DATA_FILE)
 
 # ---------------- Preprocessing ----------------
 y = data["Churn"]
 X = data.drop("Churn", axis=1)
-X = pd.get_dummies(X, drop_first=True)  # Cross-platform one-hot encoding
+X = pd.get_dummies(X, drop_first=True)  # one-hot encoding for all platforms
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
+
+# ---------------- Create models folder ----------------
+MODELS_DIR = "models"
+os.makedirs(MODELS_DIR, exist_ok=True)
 
 # ---------------- Training ----------------
 with mlflow.start_run():
@@ -65,11 +74,8 @@ with mlflow.start_run():
     print("\n=== Confusion Matrix ===")
     print(cm_df)
 
-    # ---------------- Create models folder ----------------
-    os.makedirs("models", exist_ok=True)
-
-    # Confusion matrix plot
-    cm_path = os.path.join("models", "confusion_matrix.png")
+    # ---------------- Save Confusion Matrix Plot ----------------
+    cm_path = os.path.join(MODELS_DIR, "confusion_matrix.png")
     plt.figure(figsize=(5, 4))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=[0,1], yticklabels=[0,1])
     plt.xlabel("Predicted")
@@ -79,9 +85,9 @@ with mlflow.start_run():
     plt.close()
     mlflow.log_artifact(cm_path)
 
-    # ROC curve plot
-    roc_path = os.path.join("models", "roc_curve.png")
+    # ---------------- Save ROC Curve Plot ----------------
     fpr, tpr, _ = roc_curve(y_test, y_proba)
+    roc_path = os.path.join(MODELS_DIR, "roc_curve.png")
     plt.figure()
     plt.plot(fpr, tpr, label=f"ROC curve (AUC = {roc_auc:.2f})")
     plt.plot([0,1], [0,1], "k--")
@@ -93,20 +99,20 @@ with mlflow.start_run():
     plt.close()
     mlflow.log_artifact(roc_path)
 
-    # ---------------- Save model ----------------
-    model_path = os.path.join("models", "rf_classifier.pkl")
+    # ---------------- Save Model ----------------
+    model_path = os.path.join(MODELS_DIR, "rf_classifier.pkl")
     joblib.dump(model, model_path)
     print(f"\nModel saved to {model_path}")
     mlflow.log_artifact(model_path, artifact_path="models")
 
-    # ---------------- Save classification report ----------------
-    report_path = os.path.join("models", "classification_report.txt")
+    # ---------------- Save Classification Report ----------------
+    report_path = os.path.join(MODELS_DIR, "classification_report.txt")
     with open(report_path, "w") as f:
         f.write("=== Classification Report ===\n")
         f.write(class_report)
     mlflow.log_artifact(report_path)
 
-    # ---------------- Log params & metrics ----------------
+    # ---------------- Log parameters & metrics ----------------
     mlflow.log_param("n_estimators", 150)
     mlflow.log_param("max_depth", 8)
     mlflow.log_param("random_state", 42)
