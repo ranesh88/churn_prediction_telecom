@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480/6050606ad62945c7b34ae27298e0d6c7/artifacts
+end_time: 1755272115366
+entry_point_name: ''
+experiment_id: '614241668337332480'
+lifecycle_stage: active
+run_id: 6050606ad62945c7b34ae27298e0d6c7
+run_name: omniscient-mule-970
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755272113770
+status: 3
+tags: []
+user_id: User

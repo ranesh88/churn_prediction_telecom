@@ -6,3 +6,6 @@ xgboost>=1.6
 matplotlib
 seaborn
 gunicorn
+mlflow
+joblib
+dagshub

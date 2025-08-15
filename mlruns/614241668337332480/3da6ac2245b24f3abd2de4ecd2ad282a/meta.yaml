@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480/3da6ac2245b24f3abd2de4ecd2ad282a/artifacts
+end_time: 1755272035970
+entry_point_name: ''
+experiment_id: '614241668337332480'
+lifecycle_stage: active
+run_id: 3da6ac2245b24f3abd2de4ecd2ad282a
+run_name: intelligent-fox-811
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755272034520
+status: 3
+tags: []
+user_id: User

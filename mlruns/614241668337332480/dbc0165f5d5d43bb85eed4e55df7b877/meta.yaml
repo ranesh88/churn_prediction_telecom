@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480/dbc0165f5d5d43bb85eed4e55df7b877/artifacts
+end_time: 1755271631088
+entry_point_name: ''
+experiment_id: '614241668337332480'
+lifecycle_stage: active
+run_id: dbc0165f5d5d43bb85eed4e55df7b877
+run_name: nebulous-crane-964
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755271628974
+status: 3
+tags: []
+user_id: User

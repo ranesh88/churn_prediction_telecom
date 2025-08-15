@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480/models/m-6fc36f7e97da475a8953dcb0d3b6ef80/artifacts
+creation_timestamp: 1755270815713
+experiment_id: '614241668337332480'
+last_updated_timestamp: 1755270821341
+model_id: m-6fc36f7e97da475a8953dcb0d3b6ef80
+model_type: null
+name: churn_model_pipeline
+source_run_id: bc8388f01d5041c3965dbc8911a0876f
+status: 2
+status_message: null

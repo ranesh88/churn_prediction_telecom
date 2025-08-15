@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480/1e5517fa954d4c71bd907e62ae0866b3/artifacts
+end_time: 1755270331581
+entry_point_name: ''
+experiment_id: '614241668337332480'
+lifecycle_stage: active
+run_id: 1e5517fa954d4c71bd907e62ae0866b3
+run_name: rogue-boar-232
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755270321318
+status: 3
+tags: []
+user_id: User

@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480/bc8388f01d5041c3965dbc8911a0876f/artifacts
+end_time: 1755270821353
+entry_point_name: ''
+experiment_id: '614241668337332480'
+lifecycle_stage: active
+run_id: bc8388f01d5041c3965dbc8911a0876f
+run_name: valuable-goose-21
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755270814898
+status: 3
+tags: []
+user_id: User

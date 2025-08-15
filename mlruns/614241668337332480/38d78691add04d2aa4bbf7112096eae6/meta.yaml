@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480/38d78691add04d2aa4bbf7112096eae6/artifacts
+end_time: 1755271018025
+entry_point_name: ''
+experiment_id: '614241668337332480'
+lifecycle_stage: active
+run_id: 38d78691add04d2aa4bbf7112096eae6
+run_name: exultant-koi-798
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755271017255
+status: 4
+tags: []
+user_id: User

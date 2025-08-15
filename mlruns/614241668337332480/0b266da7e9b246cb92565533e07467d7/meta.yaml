@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480/0b266da7e9b246cb92565533e07467d7/artifacts
+end_time: 1755270231271
+entry_point_name: ''
+experiment_id: '614241668337332480'
+lifecycle_stage: active
+run_id: 0b266da7e9b246cb92565533e07467d7
+run_name: magnificent-tern-189
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755270231224
+status: 4
+tags: []
+user_id: User

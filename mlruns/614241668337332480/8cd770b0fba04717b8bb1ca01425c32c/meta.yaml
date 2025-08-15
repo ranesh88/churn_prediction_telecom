@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480/8cd770b0fba04717b8bb1ca01425c32c/artifacts
+end_time: 1755271151585
+entry_point_name: ''
+experiment_id: '614241668337332480'
+lifecycle_stage: active
+run_id: 8cd770b0fba04717b8bb1ca01425c32c
+run_name: handsome-crab-514
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1755271144933
+status: 3
+tags: []
+user_id: User

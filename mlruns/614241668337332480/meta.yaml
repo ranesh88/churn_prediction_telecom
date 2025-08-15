@@ -1,0 +1,6 @@
+artifact_location: file:///C:/Users/User/.venv/churn_prediction_telecom/mlruns/614241668337332480
+creation_time: 1755270230355
+experiment_id: '614241668337332480'
+last_update_time: 1755270230355
+lifecycle_stage: active
+name: Telecom_Churn_Experiment
