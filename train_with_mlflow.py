@@ -1,9 +1,8 @@
-import os
-from pathlib import Path
 import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
+from pathlib import Path
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -15,23 +14,23 @@ from sklearn.metrics import (
 import mlflow
 import mlflow.sklearn
 
-# ---------------- Set working directory to script location ----------------
+# ---------------- Paths ----------------
 BASE_DIR = Path(__file__).parent.resolve()
-os.chdir(BASE_DIR)
-
-# ---------------- MLflow setup ----------------
+DATA_PATH = BASE_DIR / "Churn_Prediction_Final.csv"
+MODELS_DIR = BASE_DIR / "models"
 MLRUNS_DIR = BASE_DIR / "mlruns"
+
+MODELS_DIR.mkdir(exist_ok=True)
 MLRUNS_DIR.mkdir(exist_ok=True)
 
-# Use proper file URI so MLflow works cross-platform
+# ---------------- MLflow setup ----------------
 mlflow_tracking_uri = MLRUNS_DIR.as_uri()
 mlflow.set_tracking_uri(mlflow_tracking_uri)
 mlflow.set_experiment("Telecom_Churn_Experiment")
 print(f"✅ MLflow tracking set to local '{MLRUNS_DIR}' folder (URI: {mlflow_tracking_uri})")
 
-# ---------------- Load data ----------------
-data_path = BASE_DIR / "Churn_Prediction_Final.csv"
-data = pd.read_csv(data_path)
+# ---------------- Load Data ----------------
+data = pd.read_csv(DATA_PATH)
 
 # ---------------- Preprocessing ----------------
 y = data["Churn"]
@@ -41,10 +40,6 @@ X = pd.get_dummies(X, drop_first=True)  # Cross-platform one-hot encoding
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
-
-# ---------------- Create models folder ----------------
-MODELS_DIR = BASE_DIR / "models"
-MODELS_DIR.mkdir(exist_ok=True)
 
 # ---------------- Training ----------------
 with mlflow.start_run():
@@ -128,5 +123,4 @@ with mlflow.start_run():
     mlflow.log_metric("recall", recall)
     mlflow.log_metric("roc_auc", roc_auc)
 
-# ---------------- Optional: Run MLflow UI locally ----------------
-print("\nRun MLflow UI locally with: mlflow ui --port 5000")
+print("\n✅ Training complete. Run MLflow UI locally with: mlflow ui --port 5000")
