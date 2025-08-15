@@ -39,8 +39,7 @@ jobs:
 
     # 5. Upload model artifacts to GitHub
     - name: Upload trained model artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: trained-model
         path: models/
-
