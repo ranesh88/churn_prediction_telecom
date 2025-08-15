@@ -1,0 +1,8 @@
+Flask
+pandas
+numpy
+scikit-learn>=1.0
+xgboost>=1.6
+matplotlib
+seaborn
+gunicorn

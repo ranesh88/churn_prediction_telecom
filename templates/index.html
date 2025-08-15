@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telecom Customer Churn Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f8;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            max-width: 700px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        select, input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Telecom Customer Churn Prediction</h1>
+    <form action="/predict_route" method="POST">
+        <label for="gender">Gender</label>
+        <select name="gender" required>
+            {% for g in gender %}
+                <option value="{{ g }}">{{ g }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="SeniorCitizen">Senior Citizen</label>
+        <select name="SeniorCitizen" required>
+            {% for s in SeniorCitizen %}
+                <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="Partner">Partner</label>
+        <select name="Partner" required>
+            {% for p in Partner %}
+                <option value="{{ p }}">{{ p }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="Dependents">Dependents</label>
+        <select name="Dependents" required>
+            {% for d in Dependents %}
+                <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="tenure">Tenure (Months)</label>
+        <input type="number" name="tenure" min="0" max="120" required>
+
+        <label for="PhoneService">Phone Service</label>
+        <select name="PhoneService" required>
+            {% for ps in PhoneService %}
+                <option value="{{ ps }}">{{ ps }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="MultipleLines">Multiple Lines</label>
+        <select name="MultipleLines" required>
+            {% for ml in MultipleLines %}
+                <option value="{{ ml }}">{{ ml }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="InternetService">Internet Service</label>
+        <select name="InternetService" required>
+            {% for i in InternetService %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="OnlineSecurity">Online Security</label>
+        <select name="OnlineSecurity" required>
+            {% for os in OnlineSecurity %}
+                <option value="{{ os }}">{{ os }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="OnlineBackup">Online Backup</label>
+        <select name="OnlineBackup" required>
+            {% for ob in OnlineBackup %}
+                <option value="{{ ob }}">{{ ob }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="DeviceProtection">Device Protection</label>
+        <select name="DeviceProtection" required>
+            {% for dp in DeviceProtection %}
+                <option value="{{ dp }}">{{ dp }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="TechSupport">Tech Support</label>
+        <select name="TechSupport" required>
+            {% for ts in TechSupport %}
+                <option value="{{ ts }}">{{ ts }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="StreamingTV">Streaming TV</label>
+        <select name="StreamingTV" required>
+            {% for st in StreamingTV %}
+                <option value="{{ st }}">{{ st }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="StreamingMovies">Streaming Movies</label>
+        <select name="StreamingMovies" required>
+            {% for sm in StreamingMovies %}
+                <option value="{{ sm }}">{{ sm }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="Contract">Contract</label>
+        <select name="Contract" required>
+            {% for c in Contract %}
+                <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="PaperlessBilling">Paperless Billing</label>
+        <select name="PaperlessBilling" required>
+            {% for pb in PaperlessBilling %}
+                <option value="{{ pb }}">{{ pb }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="PaymentMethod">Payment Method</label>
+        <select name="PaymentMethod" required>
+            {% for pm in PaymentMethod %}
+                <option value="{{ pm }}">{{ pm }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="MonthlyCharges">Monthly Charges</label>
+        <input type="number" name="MonthlyCharges" step="0.01" required>
+
+        <label for="TotalCharges">Total Charges</label>
+        <input type="number" name="TotalCharges" step="0.01" required>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if prediction %}
+    <div class="result">
+        <strong>Prediction:</strong> {{ prediction }}
+    </div>
+    {% endif %}
+</body>
+</html>
