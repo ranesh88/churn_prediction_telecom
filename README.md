@@ -1,3 +1,3 @@
-## Live link: https://churn-prediction-telecom.onrender.com 
+## Live link: 
 
 https://churn-prediction-telecom.onrender.com
