@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
@@ -15,31 +16,35 @@ import mlflow
 import mlflow.sklearn
 
 # ---------------- Set working directory to script location ----------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).parent.resolve()
 os.chdir(BASE_DIR)
 
 # ---------------- MLflow setup ----------------
-MLRUNS_DIR = "mlruns"  # relative path works cross-platform
-mlflow.set_tracking_uri(MLRUNS_DIR)
+MLRUNS_DIR = BASE_DIR / "mlruns"
+MLRUNS_DIR.mkdir(exist_ok=True)
+
+# Use proper file URI so MLflow works cross-platform
+mlflow_tracking_uri = MLRUNS_DIR.as_uri()
+mlflow.set_tracking_uri(mlflow_tracking_uri)
 mlflow.set_experiment("Telecom_Churn_Experiment")
-print(f"✅ MLflow tracking set to local '{MLRUNS_DIR}' folder")
+print(f"✅ MLflow tracking set to local '{MLRUNS_DIR}' folder (URI: {mlflow_tracking_uri})")
 
 # ---------------- Load data ----------------
-DATA_FILE = "Churn_Prediction_Final.csv"
-data = pd.read_csv(DATA_FILE)
+data_path = BASE_DIR / "Churn_Prediction_Final.csv"
+data = pd.read_csv(data_path)
 
 # ---------------- Preprocessing ----------------
 y = data["Churn"]
 X = data.drop("Churn", axis=1)
-X = pd.get_dummies(X, drop_first=True)  # one-hot encoding for all platforms
+X = pd.get_dummies(X, drop_first=True)  # Cross-platform one-hot encoding
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
 # ---------------- Create models folder ----------------
-MODELS_DIR = "models"
-os.makedirs(MODELS_DIR, exist_ok=True)
+MODELS_DIR = BASE_DIR / "models"
+MODELS_DIR.mkdir(exist_ok=True)
 
 # ---------------- Training ----------------
 with mlflow.start_run():
@@ -75,7 +80,7 @@ with mlflow.start_run():
     print(cm_df)
 
     # ---------------- Save Confusion Matrix Plot ----------------
-    cm_path = os.path.join(MODELS_DIR, "confusion_matrix.png")
+    cm_path = MODELS_DIR / "confusion_matrix.png"
     plt.figure(figsize=(5, 4))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=[0,1], yticklabels=[0,1])
     plt.xlabel("Predicted")
@@ -83,11 +88,11 @@ with mlflow.start_run():
     plt.title("Confusion Matrix")
     plt.savefig(cm_path)
     plt.close()
-    mlflow.log_artifact(cm_path)
+    mlflow.log_artifact(str(cm_path))
 
     # ---------------- Save ROC Curve Plot ----------------
     fpr, tpr, _ = roc_curve(y_test, y_proba)
-    roc_path = os.path.join(MODELS_DIR, "roc_curve.png")
+    roc_path = MODELS_DIR / "roc_curve.png"
     plt.figure()
     plt.plot(fpr, tpr, label=f"ROC curve (AUC = {roc_auc:.2f})")
     plt.plot([0,1], [0,1], "k--")
@@ -97,20 +102,20 @@ with mlflow.start_run():
     plt.legend(loc="lower right")
     plt.savefig(roc_path)
     plt.close()
-    mlflow.log_artifact(roc_path)
+    mlflow.log_artifact(str(roc_path))
 
     # ---------------- Save Model ----------------
-    model_path = os.path.join(MODELS_DIR, "rf_classifier.pkl")
+    model_path = MODELS_DIR / "rf_classifier.pkl"
     joblib.dump(model, model_path)
     print(f"\nModel saved to {model_path}")
-    mlflow.log_artifact(model_path, artifact_path="models")
+    mlflow.log_artifact(str(model_path), artifact_path="models")
 
     # ---------------- Save Classification Report ----------------
-    report_path = os.path.join(MODELS_DIR, "classification_report.txt")
+    report_path = MODELS_DIR / "classification_report.txt"
     with open(report_path, "w") as f:
         f.write("=== Classification Report ===\n")
         f.write(class_report)
-    mlflow.log_artifact(report_path)
+    mlflow.log_artifact(str(report_path))
 
     # ---------------- Log parameters & metrics ----------------
     mlflow.log_param("n_estimators", 150)
