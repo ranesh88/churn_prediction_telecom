@@ -4,7 +4,7 @@ import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
+from scipy.stats import chi2_contingency
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -17,19 +17,18 @@ from sklearn.metrics import (
 import mlflow
 import mlflow.sklearn
 
-# ---------------- Base directories ----------------
-BASE_DIR = Path(__file__).parent.resolve()
-MLRUNS_DIR = BASE_DIR / "mlruns"
-MODELS_DIR = BASE_DIR / "models"
-
-MLRUNS_DIR.mkdir(exist_ok=True)
-MODELS_DIR.mkdir(exist_ok=True)
-
-# ---------------- MLflow tracking ----------------
-mlflow_tracking_uri = MLRUNS_DIR.resolve().as_uri()
+# ---------------- MLflow authentication ----------------
+dagshub_username = "ranesh88"
+dagshub_token = "1034242442f1c28d28868dae1e2701a2df4e0d35"
+mlflow_tracking_uri = f"https://{dagshub_username}:{dagshub_token}@dagshub.com/ranesh88/churn_prediction_telecom.mlflow"
 mlflow.set_tracking_uri(mlflow_tracking_uri)
 mlflow.set_experiment("Telecom_Churn_Experiment")
 print(f"✅ MLflow tracking URI: {mlflow_tracking_uri}")
+
+# ---------------- Base directories ----------------
+BASE_DIR = Path(__file__).parent.resolve()
+MODELS_DIR = BASE_DIR / "models"
+MODELS_DIR.mkdir(exist_ok=True)
 
 # ---------------- Load data ----------------
 data_path = BASE_DIR / "Churn_Prediction_Final.csv"
@@ -40,7 +39,7 @@ y = data["Churn"]
 X = pd.get_dummies(data.drop("Churn", axis=1), drop_first=True)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+    X, y, test_size=0.2, random_state=42
 )
 
 # ---------------- Train & log ----------------
@@ -59,75 +58,79 @@ with mlflow.start_run() as run:
     recall = recall_score(y_test, y_pred)
     roc_auc = roc_auc_score(y_test, y_proba)
     avg_precision = average_precision_score(y_test, y_proba)
-    class_report_dict = classification_report(y_test, y_pred, output_dict=True)
+    class_report = classification_report(y_test, y_pred)
 
-    print(f"Accuracy: {accuracy:.4f}, F1: {f1:.4f}, Precision: {precision:.4f}, "
-          f"Recall: {recall:.4f}, ROC AUC: {roc_auc:.4f}, PR-AUC: {avg_precision:.4f}")
+    print(f"Accuracy: {accuracy:.4f}, F1: {f1:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}, ROC AUC: {roc_auc:.4f}, PR-AUC: {avg_precision:.4f}")
 
     # ---------------- Confusion Matrix ----------------
     cm = confusion_matrix(y_test, y_pred)
     cm_path = MODELS_DIR / "confusion_matrix.png"
     plt.figure(figsize=(5,4))
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False,
-                xticklabels=["No Churn","Churn"], yticklabels=["No Churn","Churn"])
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
     plt.xlabel("Predicted"); plt.ylabel("Actual"); plt.title("Confusion Matrix")
     plt.tight_layout(); plt.savefig(cm_path); plt.close()
     mlflow.log_artifact(str(cm_path))
-
-    # ---------------- Classification Report Heatmap ----------------
-    report_df = pd.DataFrame(class_report_dict).transpose()
-    report_df = report_df.iloc[:-1, :-1]  # Remove avg/total row & last col
-    report_path = MODELS_DIR / "classification_report_heatmap.png"
-    plt.figure(figsize=(8,4))
-    sns.heatmap(report_df, annot=True, cmap="coolwarm", fmt=".2f", cbar=False)
-    plt.title("Classification Report Heatmap", fontsize=14, fontweight="bold")
-    plt.yticks(rotation=0)
-    plt.tight_layout(); plt.savefig(report_path); plt.close()
-    mlflow.log_artifact(str(report_path))
 
     # ---------------- ROC Curve ----------------
     fpr, tpr, _ = roc_curve(y_test, y_proba)
     roc_path = MODELS_DIR / "roc_curve.png"
     plt.figure()
-    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.2f}", color="darkorange")
+    plt.plot(fpr, tpr, label=f"ROC curve (AUC = {roc_auc:.2f})", color="darkorange", linewidth=2)
     plt.plot([0,1], [0,1], "k--")
-    plt.xlabel("False Positive Rate"); plt.ylabel("True Positive Rate")
-    plt.title("ROC Curve"); plt.legend(loc="lower right")
-    plt.tight_layout(); plt.savefig(roc_path); plt.close()
+    plt.xlabel("False Positive Rate"); plt.ylabel("True Positive Rate"); plt.title("ROC Curve")
+    plt.legend(loc="lower right"); plt.tight_layout()
+    plt.savefig(roc_path); plt.close()
     mlflow.log_artifact(str(roc_path))
 
     # ---------------- Precision-Recall Curve ----------------
     precision_vals, recall_vals, _ = precision_recall_curve(y_test, y_proba)
-    pr_path = MODELS_DIR / "precision_recall_curve.png"
+    pr_path = MODELS_DIR / "pr_curve.png"
     plt.figure()
     plt.plot(recall_vals, precision_vals, color="purple", linewidth=2, label=f"AP = {avg_precision:.2f}")
-    no_skill = sum(y_test)/len(y_test)
-    plt.hlines(no_skill, 0, 1, linestyle='--', color='gray', label='No Skill')
-    plt.xlabel("Recall"); plt.ylabel("Precision")
-    plt.title("Precision-Recall Curve"); plt.legend()
-    plt.tight_layout(); plt.savefig(pr_path); plt.close()
+    plt.xlabel("Recall"); plt.ylabel("Precision"); plt.title("Precision-Recall Curve")
+    plt.legend(loc="lower left"); plt.tight_layout()
+    plt.savefig(pr_path); plt.close()
     mlflow.log_artifact(str(pr_path))
 
     # ---------------- Feature Importance ----------------
     importances = model.feature_importances_
     feature_names = X.columns
-    fi_df = pd.DataFrame({"Feature": feature_names, "Importance": importances})
-    fi_df = fi_df.sort_values("Importance", ascending=False)
+    fi_df = pd.DataFrame({"Feature": feature_names, "Importance": importances}).sort_values("Importance", ascending=False)
+
     fi_path = MODELS_DIR / "feature_importance.png"
-    plt.figure(figsize=(10,6))
+    plt.figure(figsize=(8,5))
     sns.barplot(x="Importance", y="Feature", data=fi_df, palette="viridis")
-    plt.title("Feature Importance (Random Forest)", fontsize=14, fontweight="bold")
-    for i, v in enumerate(fi_df["Importance"]):
-        plt.text(v + 0.001, i, f"{v:.2f}", va="center")
+    plt.title("Feature Importance (Random Forest)")
     plt.tight_layout(); plt.savefig(fi_path); plt.close()
     mlflow.log_artifact(str(fi_path))
 
-    # ---------------- Save model ----------------
-    model_path = MODELS_DIR / "rf_classifier.pkl"
-    joblib.dump(model, model_path)
-    mlflow.log_artifact(str(model_path))
+    # ---------------- Classification Report ----------------
+    report_path = MODELS_DIR / "classification_report.txt"
+    with open(report_path, "w") as f:
+        f.write(class_report)
+    mlflow.log_artifact(str(report_path))
 
-    # ---------------- Log params & metrics ----------------
+    # ---------------- Hypothesis Testing (Chi-Square) ----------------
+    chi2_results = []
+    for col in data.select_dtypes(include='object').columns:
+        if col != 'Churn':
+            ct = pd.crosstab(data[col], data['Churn'])
+            chi2, p, dof, _ = chi2_contingency(ct)
+            chi2_results.append({
+                'Feature': col,
+                'Chi2 Statistic': round(chi2, 3),
+                'p-value': round(p, 4),
+                'Degrees of Freedom': dof,
+                'Significant': 'Yes' if p < 0.05 else 'No'
+            })
+
+    chi2_df = pd.DataFrame(chi2_results)
+    chi2_path = MODELS_DIR / "chi_square_results.csv"
+    chi2_df.to_csv(chi2_path, index=False)
+    mlflow.log_artifact(str(chi2_path))
+    print("✅ Chi-Square Hypothesis Testing results saved and logged.")
+
+    # ---------------- Log parameters & metrics ----------------
     mlflow.log_param("n_estimators", 150)
     mlflow.log_param("max_depth", 8)
     mlflow.log_param("random_state", 42)
@@ -139,4 +142,4 @@ with mlflow.start_run() as run:
     mlflow.log_metric("roc_auc", roc_auc)
     mlflow.log_metric("pr_auc", avg_precision)
 
-print("✅ Training complete. Run MLflow UI with: mlflow ui --port 5000")
+print("✅ Training complete. All metrics, plots, and hypothesis testing logged directly to DagsHub MLflow.")
