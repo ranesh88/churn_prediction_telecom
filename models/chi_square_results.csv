@@ -1,0 +1,17 @@
+Feature,Chi2 Statistic,p-value,Degrees of Freedom,Significant
+gender,0.025,0.8749,1,No
+SeniorCitizen,241.361,0.0,1,Yes
+Partner,319.748,0.0,1,Yes
+Dependents,411.693,0.0,1,Yes
+PhoneService,0.696,0.4042,1,No
+MultipleLines,29.557,0.0,1,Yes
+InternetService,1372.491,0.0,2,Yes
+OnlineSecurity,403.343,0.0,1,Yes
+OnlineBackup,91.504,0.0,1,Yes
+DeviceProtection,78.635,0.0,1,Yes
+TechSupport,412.506,0.0,1,Yes
+StreamingTV,36.471,0.0,1,Yes
+StreamingMovies,28.426,0.0,1,Yes
+Contract,2510.274,0.0,2,Yes
+PaperlessBilling,478.275,0.0,1,Yes
+PaymentMethod,1210.597,0.0,3,Yes
